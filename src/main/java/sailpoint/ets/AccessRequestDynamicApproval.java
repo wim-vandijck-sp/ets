@@ -9,7 +9,7 @@ public class AccessRequestDynamicApproval {
 		this.content = content;
 	}
 
-	public long getId() {
+  public long getId() {
 		return id;
 	}
 
