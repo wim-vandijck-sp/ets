@@ -90,10 +90,13 @@ public class AccountUpdateController {
     Properties appProps = getAppProps();
     log.debug(appProps.getProperty("tenant"));
 
-    String tenant = appProps.getProperty("tenant");
-    String patid = appProps.getProperty("patid");
-    String patsecret = appProps.getProperty("patsecret");
-    String url = "https://" + tenant + ".api.identitynow.com";
+    String tenant     = appProps.getProperty("tenant");
+    String patid      = appProps.getProperty("patid");
+    String patsecret  = appProps.getProperty("patsecret");
+    String demotenant = appProps.getProperty("demotenant");
+    String domain     = ".api.identitynow.com";
+    if ("yes".equals(demotenant)) domain = ".api.identitynow-demo.com";
+    String url = "https://" + tenant + domain;
 
     // Create IDN session
     try {
