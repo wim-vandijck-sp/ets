@@ -395,6 +395,7 @@ public class AccountUpdateController {
       List<Identity> ids = response.body();
       log.debug("Found {} identities", ids.size());
 
+      if (ids.isEmpty()) throw new Exception("No identities found!");
       int count = 0;
       for (Identity identity : ids) {
         log.debug("identity: {}", identity);
