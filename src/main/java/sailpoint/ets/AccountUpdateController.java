@@ -33,6 +33,7 @@ import com.google.gson.JsonParser;
 import retrofit2.Response;
 import sailpoint.identitynow.api.IdentityNowService;
 import sailpoint.identitynow.api.object.AccessEvent;
+import sailpoint.identitynow.api.object.AccountActivity;
 import sailpoint.identitynow.api.object.Identity;
 import sailpoint.identitynow.api.object.QueryObject;
 import sailpoint.identitynow.api.object.Schemas;
@@ -122,46 +123,10 @@ public class AccountUpdateController {
       if (num != 0) {
         log.debug("Found {} entitlement(s)", accountEntitlements.size());
         log.debug(accountEntitlements);
+        verifyEntitlements(identityId, sourceId, accountEntitlements);
       } else {
         log.debug("No entitlements detected.");
       }
-
-      // Check if entitlements are part of the last snapshot.
-      // 1. Fetch last snapshot
-      Snapshot snapshot = idnService.getHistoricalIdentitiesService().getLatestSnapshot(identityId).execute().body();
-      log.debug("Snapshot: {}", snapshot);
-      String snapshotDate = snapshot.getSnapshot();
-
-      // 2. Fetch snapshot of most recent date, listing access items
-      List<AccessEvent.AccessItem> accesses = idnService.getHistoricalIdentitiesService()
-          .getSnapshot(identityId, snapshotDate, "entitlement").execute().body();
-      log.debug("Found {} accesses.", accesses.size());
-      Boolean ncd = false;
-      List<String> badgroups = new ArrayList<>();
-
-      // 3. Check if each entitlement is part of the snapshot...
-      List<String> snapshotGroups = new ArrayList<>();
-      for (AccessEvent.AccessItem access : accesses) {
-        log.debug(access.getValue());
-
-        String accessSourceId = access.getSourceId();
-        if (sourceId.equals(accessSourceId)) {
-          String group = access.getValue();
-          snapshotGroups.add(group);
-        }
-      }
-
-      for (String ent : accountEntitlements) {
-        if (!snapshotGroups.contains(ent)) {
-          ncd = true;
-          badgroups.add(ent);
-        }
-      }
-
-      // 4. Check for each group if there was a request or assignment
-
-      if (Boolean.TRUE.equals(ncd))
-        raiseAlert(identityId, sourceId, badgroups);
 
     } else {
       log.error("SourceID can not be null fetching schemas");
@@ -169,6 +134,91 @@ public class AccountUpdateController {
 
     log.trace("Leaving process");
     return new AccountUpdate(0, payload);
+  }
+
+  private void verifyEntitlements(String identityId, String sourceId, List<String> accountEntitlements)
+      throws Exception {
+
+    log.trace("Entering verifyEntitlements");
+
+    Boolean ncd = false;
+    List<String> badgroups = new ArrayList<>();
+
+    // Check if entitlements are part of the last snapshot.
+    // 1. Fetch last snapshot
+    Snapshot snapshot = idnService.getHistoricalIdentitiesService().getLatestSnapshot(identityId).execute().body();
+    log.debug("Snapshot: {}", snapshot);
+    String snapshotDate = snapshot.getSnapshot();
+
+    // 2. Fetch snapshot of most recent date, listing access items
+    List<AccessEvent.AccessItem> accesses = idnService.getHistoricalIdentitiesService()
+        .getSnapshot(identityId, snapshotDate, "entitlement").execute().body();
+    log.debug("Found {} accesses.", accesses.size());
+
+    // 3. Check if each entitlement is part of the snapshot...
+    List<String> snapshotGroups = new ArrayList<>();
+    for (AccessEvent.AccessItem access : accesses) {
+      log.debug(access.getValue());
+
+      String accessSourceId = access.getSourceId();
+      if (sourceId.equals(accessSourceId)) {
+        String group = access.getValue();
+        snapshotGroups.add(group);
+      }
+    }
+
+    for (String ent : accountEntitlements) {
+      if (!snapshotGroups.contains(ent)) {
+        log.debug("Cannot find entitilement in snapshot, checking access requests.");
+        ncd = checkAccountActivities(identityId, ent);
+        if (Boolean.TRUE.equals(ncd))
+          badgroups.add(ent);
+      }
+    }
+
+    // 4. Check for each group if there was a request or assignment
+    if (Boolean.TRUE.equals(ncd))
+      raiseAlert(identityId, sourceId, badgroups);
+
+    log.trace("Leaving verifyEntitlements");
+  }
+
+  private Boolean checkAccountActivities(String identityId, String ent) throws Exception {
+    log.trace("Entering checkAccountActivities");
+    Boolean ncd = true;
+
+    List<AccountActivity> accountActivities = idnService.getAccountActivitiesService().getAccountActivities(identityId)
+        .execute().body();
+    for (AccountActivity accountActivity : accountActivities) {
+      Boolean requested = checkAccountActivity(accountActivity, ent);
+      if (Boolean.TRUE.equals(requested)) {
+        ncd = false;
+        break;
+      }
+    }
+    log.trace("Leaving checkAccountActivities: {}", ncd);
+    return ncd;
+  }
+
+  private Boolean checkAccountActivity(AccountActivity activity, String ent) {
+    log.trace("Entering checkAccountActivity: {}", ent);
+    Boolean requested = false;
+
+    List<AccountActivity.Item> requestItems = activity.getItems();
+    for (AccountActivity.Item item : requestItems) {
+      log.trace("Item: {}", item);
+      if (ent.equals(item.getValue()) && "FINISHED".equals(item.getApprovalStatus())) {
+        log.debug("Found request for Entitlement:");
+        log.debug(item.getId());
+        log.debug("Operation: {}", item.getOperation());
+        log.debug("Attribute: {}", item.getAttribute());
+        log.debug("Value: {}", item.getValue());
+        log.debug("Account: {}", item.getNativeIdentity());
+        requested = true;
+      }
+    }
+    log.trace("Leaving checkAccountActivity: {}", requested);
+    return requested;
   }
 
   private void raiseAlert(String identityId, String sourceId, List<String> badgroups) {
@@ -305,7 +355,7 @@ public class AccountUpdateController {
       log.info("Session created.");
     } catch (Exception e) {
       log.error(
-          "Error Logging into IdentityNow.  Check your credentials and try again. [{}]", e.getLocalizedMessage() );
+          "Error Logging into IdentityNow.  Check your credentials and try again. [{}]", e.getLocalizedMessage());
       e.printStackTrace();
       System.exit(0);
     }
@@ -344,12 +394,12 @@ public class AccountUpdateController {
 
       int count = 0;
       for (Identity identity : ids) {
-        log.debug("identity: {}" ,identity);
+        log.debug("identity: {}", identity);
         count++;
-        log.debug( "{} : id           : {}", count, identity.getId());
-        log.debug( "{} : name         : {}", count, identity.getSource().getName());
-        log.debug( "{} : displayName  : {}", count, identity.getDisplayName());
-        log.debug( "{} : attributes   : {}", count, identity.getAttributes());
+        log.debug("{} : id           : {}", count, identity.getId());
+        log.debug("{} : name         : {}", count, identity.getSource().getName());
+        log.debug("{} : displayName  : {}", count, identity.getDisplayName());
+        log.debug("{} : attributes   : {}", count, identity.getAttributes());
         log.debug("===============");
         attributes = identity.getAttributes();
 
