@@ -38,7 +38,6 @@ import sailpoint.identitynow.api.object.QueryObject;
 import sailpoint.identitynow.api.object.Schemas;
 import sailpoint.identitynow.api.object.SearchQuery;
 import sailpoint.identitynow.api.object.Snapshot;
-import sailpoint.identitynow.api.object.Source;
 
 @Component
 @PropertySource("classpath:application.properties")
@@ -109,9 +108,6 @@ public class AccountUpdateController {
     } catch (Exception e) {
       log.error("Error checking identity attributes: {}", e.getLocalizedMessage());
     }
-
-    // Fetch source
-    log.debug("Fetching source");
 
     // Identify entitlements on account
     if (null != sourceId) {
@@ -365,23 +361,4 @@ public class AccountUpdateController {
     return attributes;
   }
 
-  private Source getSource(String sourceId) {
-    log.debug("Entering getSource {}", sourceId);
-
-    Source source = null;
-
-    Response<Source> sourceResponse;
-    try {
-      sourceResponse = idnService.getSourceService().getSource(sourceId).execute();
-      if (sourceResponse.isSuccessful()) {
-        source = sourceResponse.body();
-      } else {
-        log.debug("Response was not successful for source search.");
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    log.debug("Leaving getSource");
-    return source;
-  }
 }
