@@ -182,7 +182,7 @@ public class AccountUpdateController {
     // 4. Check for each group if there was a request or assignment
     if (Boolean.TRUE.equals(ncd))
       raiseAlert(identityId, sourceId, badgroups);
-
+    log.debug("Nothing to report, move along now...");
     log.trace("Leaving verifyEntitlements");
   }
 
