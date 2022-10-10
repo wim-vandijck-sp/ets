@@ -29,6 +29,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import retrofit2.Response;
+import sailpoint.ets.AccountUpdate.Change;
 import sailpoint.identitynow.api.IdentityNowService;
 import sailpoint.identitynow.api.object.AccessEvent;
 import sailpoint.identitynow.api.object.AccountActivity;
@@ -117,24 +118,58 @@ public class AccountUpdateController {
       attrs = getAttributes(identityId);
     } catch (Exception e) {
       log.error("Error checking identity attributes: {}", e.getLocalizedMessage());
+      return update;
     }
 
     // Identify entitlements on account
     if (null != sourceId) {
-      Schemas accountSchema = getAccountSchema(sourceId);
-
+      Schemas accountSchema     = getAccountSchema(sourceId);
       List<String> entitlements = getEntitlementsFromSchema(accountSchema);
       log.debug("Got entitlements: {}", entitlements);
+      // Only get new entitlements
+      List<String> newAccountEntitlements = getNewEntitlements(update,entitlements);
+
+      // Verify entitlements in the changes of the body
+      verifyEntitlements(identityId, sourceId, newAccountEntitlements);
 
     } else {
       log.error("SourceID can not be null fetching schemas");
     }
 
-    // Verify entitlements in the changes of the body
-    verifyEntitlements(identityId, sourceId, null);
-
     log.trace("Leaving process");
     return new AccountUpdate(0, payload);
+  }
+
+  private List<String> getNewEntitlements(AccountUpdate update, List<String> entitlements) {
+    log.trace("Entering getNewEntitlements");
+    List<String> ents = new ArrayList<>();
+
+    List<Change> changes = update.getChanges();
+    for (Change change : changes) {
+      String attribute = change.getAttribute();
+      if (entitlements.contains(attribute)) {
+        Object oldValue = change.getOldValue();
+        Object newValue = change.getNewValue();
+        List<String> oldList = new ArrayList<>();
+        List<String> newList = new ArrayList<>();
+
+        if (oldValue instanceof String) {
+          oldList.add((String) oldValue);
+        } else {
+          oldList = (List<String>) oldValue;
+        }
+        if (newValue instanceof String) {
+          // if newValue is String, it's the only change.
+          ents.add((String) newValue);
+        } else {
+          newList = (List<String>) newValue;
+        }
+
+        ents = new ArrayList<>(newList);
+        ents.removeAll(oldList);}
+    }
+    log.trace("Leaving getNewEntitlements: {}", ents);
+    return ents;
   }
 
   private void verifyEntitlements(String identityId, String sourceId, List<String> accountEntitlements)
@@ -170,7 +205,7 @@ public class AccountUpdateController {
 
     for (String ent : accountEntitlements) {
       if (!snapshotGroups.contains(ent)) {
-        log.debug("Cannot find entitilement in snapshot, checking access requests.");
+        log.debug("Cannot find entitlement in snapshot, checking access requests.");
         ncd = checkAccountActivities(identityId, ent);
         if (Boolean.TRUE.equals(ncd))
           badgroups.add(ent);
@@ -394,18 +429,20 @@ public class AccountUpdateController {
       List<Identity> ids = response.body();
       log.debug("Found {} identities", ids.size());
 
-      if (ids.isEmpty()) throw new Exception("No identities found!");
       int count = 0;
-      for (Identity identity : ids) {
-        log.debug("identity: {}", identity);
-        count++;
-        log.debug("{} : id           : {}", count, identity.getId());
-        log.debug("{} : name         : {}", count, identity.getSource().getName());
-        log.debug("{} : displayName  : {}", count, identity.getDisplayName());
-        log.debug("{} : attributes   : {}", count, identity.getAttributes());
-        log.debug("===============");
-        attributes = identity.getAttributes();
-
+      if (ids.isEmpty()) {
+        throw new Exception("No identities found!");
+      } else {
+        for (Identity identity : ids) {
+          log.debug("identity: {}", identity);
+          count++;
+          log.debug("{} : id           : {}", count, identity.getId());
+          log.debug("{} : name         : {}", count, identity.getSource().getName());
+          log.debug("{} : displayName  : {}", count, identity.getDisplayName());
+          log.debug("{} : attributes   : {}", count, identity.getAttributes());
+          log.debug("===============");
+          attributes = identity.getAttributes();
+        }
       }
     } else {
       log.debug("Response was not successful for identity search.");
