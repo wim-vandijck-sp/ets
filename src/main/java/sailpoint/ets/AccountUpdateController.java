@@ -28,8 +28,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
-
 import retrofit2.Response;
 import sailpoint.identitynow.api.IdentityNowService;
 import sailpoint.identitynow.api.object.AccessEvent;
@@ -63,23 +61,31 @@ public class AccountUpdateController {
 
     log.trace("Entering process");
 
-    AccountUpdate update = new AccountUpdate(counter.incrementAndGet(), payload);
 
     log.debug("Host is : {}", host);
-    String identityId = null;
-    String sourceId = null;
-    List<String> accountEntitlements = null;
+    String        identityId = null;
+    String        sourceId   = null;
+    AccountUpdate update     = null;
 
     if (null != payload) {
       log.debug("payload: {}", payload);
 
       try {
-        JsonObject jo = JsonParser.parseString(payload).getAsJsonObject();
-        JsonObject start = jo.get("startInvocationInput").getAsJsonObject();
-        JsonObject input = start.get("input").getAsJsonObject();
-        identityId = input.get("identityId").getAsString();
-        sourceId = input.get("sourceId").getAsString();
+        update = new AccountUpdate(counter.incrementAndGet(), payload);
+        AccountUpdate.Identity identity = update.getIdentity();
+        if (null != identity) {
+          identityId = update.getIdentity().getId();
+        } else {
+          throw new Exception("Identity cannot be null: " + identityId);
+        }
+        AccountUpdate.Source source = update.getSource();
+        if (null != source) {
+          sourceId   = update.getSource().getId();
+        } else { 
+          log.error("Source cannot be null: {}", sourceId);
+        }
         log.debug("Identity  is {}", identityId);
+
       } catch (JsonParseException e) {
         e.printStackTrace();
       }
@@ -120,20 +126,12 @@ public class AccountUpdateController {
       List<String> entitlements = getEntitlementsFromSchema(accountSchema);
       log.debug("Got entitlements: {}", entitlements);
 
-      accountEntitlements = update.getEntitlements(entitlements);
-
-      int num = accountEntitlements.size();
-      if (num != 0) {
-        log.debug("Found {} entitlement(s)", accountEntitlements.size());
-        log.debug(accountEntitlements);
-        verifyEntitlements(identityId, sourceId, accountEntitlements);
-      } else {
-        log.debug("No entitlements detected.");
-      }
-
     } else {
       log.error("SourceID can not be null fetching schemas");
     }
+
+    // Verify entitlements in the changes of the body
+    verifyEntitlements(identityId, sourceId, null);
 
     log.trace("Leaving process");
     return new AccountUpdate(0, payload);

@@ -1,0 +1,39 @@
+{
+  "identity": {
+    "id": "ee769173319b41d19ccec6cea52f237b",
+    "name": "john.doe",
+    "type": "IDENTITY"
+  },
+  "source": {
+    "id": "904852b7c54143ebb824042ee406a393",
+    "name": "Employee AD",
+    "type": "SOURCE"
+  },
+  "account": {
+    "id": "52170a74-ca89-11ea-87d0-0242ac130003",
+    "uuid": "1cb1f07d-3e5a-4431-becd-234fa4306108",
+    "nativeIdentity": "cn=john.doe,ou=users,dc=acme,dc=com",
+    "name": "john.doe",
+    "type": "ACCOUNT"
+  },
+  "changes": [
+    {
+      "attribute": "sn",
+      "oldValue": "doe",
+      "newValue": "dough"
+    },
+    {
+      "attribute": "memberOf",
+      "oldValue": [
+        "cn=g1,ou=groups,dc=acme,dc=com",
+        "cn=g2,ou=groups,dc=acme,dc=com",
+        "cn=g3,ou=groups,dc=acme,dc=com"
+      ],
+      "newValue": [
+        "cn=g1,ou=groups,dc=acme,dc=com",
+        "cn=g3,ou=groups,dc=acme,dc=com",
+        "cn=g4,ou=groups,dc=acme,dc=com"
+      ]
+    }
+  ]
+}
