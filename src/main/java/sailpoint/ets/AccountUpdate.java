@@ -38,6 +38,7 @@ public class AccountUpdate {
     for (JsonElement changeEl : changesEl) {
       JsonObject changeOb = changeEl.getAsJsonObject();
       Change change = new Change(changeOb);
+      log.trace("Adding change: {}", change);
       changes.add(change);
     }
   }
