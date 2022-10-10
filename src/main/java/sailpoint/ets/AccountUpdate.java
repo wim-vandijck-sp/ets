@@ -1,5 +1,6 @@
 package sailpoint.ets;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,12 +34,12 @@ public class AccountUpdate {
     JsonArray changesEl = body.get("changes").getAsJsonArray();
 
     identity = new AccountUpdate.Identity(identityEl);
-    source = new AccountUpdate.Source(sourceEl);
-    account = new AccountUpdate.Account(accountEl);
+    source   = new AccountUpdate.Source(sourceEl);
+    account  = new AccountUpdate.Account(accountEl);
+    changes  = new ArrayList<>();
     for (JsonElement changeEl : changesEl) {
       JsonObject changeOb = changeEl.getAsJsonObject();
       Change change = new Change(changeOb);
-      log.trace("Adding change: {}", change);
       changes.add(change);
     }
   }
