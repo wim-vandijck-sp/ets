@@ -303,7 +303,7 @@ public class AccountUpdateController {
 
 
 
-    //createSession(url, wfpatid, wfpatsecret);
+    createSession(url, wfpatid, wfpatsecret);
     WorkflowService wService = idnService.getWorkflowService();
 
     try {
