@@ -305,7 +305,7 @@ public class AccountUpdateController {
     log.warn("input :      {}", json.toString());
 
     log.warn("CREATING A SESSION WITH WF CREDENTIALS {}");
-    createSession(url, wfpatid, wfpatsecret);
+    //createSession(url, wfpatid, wfpatsecret);
     log.warn("getting WorkflowService: {}");
     WorkflowService wService = idnService.getWorkflowService();
 
