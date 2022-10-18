@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.websocket.Session;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.message.Message;
@@ -294,10 +296,12 @@ public class AccountUpdateController {
     log.warn("input :      {}", json.toString());
 
 
-
-    String tenant     = appProps.getProperty("tenant");
     String domain     = ".api.identitynow.com";
+    String tenant     = appProps.getProperty("tenant");
     String url = "https://" + tenant + domain;
+    String demotenant = appProps.getProperty("demotenant");
+    if ("yes".equals(demotenant)) domain = ".api.identitynow-demo.com";
+
     createSession(url, wfpatid, wfpatsecret);
     WorkflowService wService = idnService.getWorkflowService();
 
