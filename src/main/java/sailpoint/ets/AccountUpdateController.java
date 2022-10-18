@@ -281,10 +281,11 @@ public class AccountUpdateController {
     JsonObject json = new JsonObject();
     json.addProperty("identity", identityId);
     json.addProperty("sourceId", sourceId);
-    
-    String jsonEnts = new Gson().toJson(badgroups);
 
-    json.addProperty("entitlements", jsonEnts);
+   for (String ent: badgroups){
+    json.addProperty("entitlement", ent);
+   }
+    
     log.warn("WE HAVE AN INPUT FOR THE WORKFLOW TRIGGER: {}");
     log.warn("input :      {}", json.toString());
 
