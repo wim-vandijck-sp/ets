@@ -32,6 +32,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+
+import retrofit2.Call;
 import retrofit2.Response;
 import sailpoint.ets.AccountUpdate.Change;
 import sailpoint.identitynow.api.IdentityNowService;
@@ -42,6 +44,7 @@ import sailpoint.identitynow.api.object.QueryObject;
 import sailpoint.identitynow.api.object.Schemas;
 import sailpoint.identitynow.api.object.SearchQuery;
 import sailpoint.identitynow.api.object.Snapshot;
+import sailpoint.identitynow.api.object.Workflow;
 import sailpoint.identitynow.api.services.WorkflowService;
 
 @Component
@@ -305,13 +308,16 @@ public class AccountUpdateController {
     log.warn("input :      {}", json.toString());
 
     log.warn("CREATING A SESSION WITH WF CREDENTIALS {}");
-    //createSession(url, wfpatid, wfpatsecret);
+    createSession(url, wfpatid, wfpatsecret);
     log.warn("getting WorkflowService: {}");
-    WorkflowService wService = idnService.getWorkflowService();
+    //WorkflowService wService = idnService.getWorkflowService();
+
 
     try {
-      wService.launchWorkflow (wfid, json);
+      //wService.launchWorkflow (wfid, json);
       log.warn("launch workflow with URL: {}", url);
+      Call<Workflow> response = idnService.getWorkflowService().launchWorkflow(wfid, json);
+      log.debug("Got response: {}", response);
     } catch (Exception e) {
       log.error("Error checking identity attributes: {}", e.getLocalizedMessage());
     } finally {
