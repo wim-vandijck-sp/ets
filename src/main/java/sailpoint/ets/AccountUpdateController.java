@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.message.Message;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -276,7 +277,7 @@ public class AccountUpdateController {
     log.debug(appProps.getProperty("workflowid"));
 
     String wfid = appProps.getProperty("workflowid");
-    String wfinput = appProps.getProperty("workflowinput");
+
 
     JsonObject json = new JsonObject();
     json.addProperty("identity", identityId);
@@ -287,6 +288,7 @@ public class AccountUpdateController {
    }
     
     log.warn("WE HAVE AN INPUT FOR THE WORKFLOW TRIGGER: {}");
+    log.warn("WorkflowID :      {}", wfid);
     log.warn("input :      {}", json.toString());
 
     WorkflowService wService = idnService.getWorkflowService();
