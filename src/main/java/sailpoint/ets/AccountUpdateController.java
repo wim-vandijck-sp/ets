@@ -291,9 +291,7 @@ public class AccountUpdateController {
      json.addProperty("entitlement", ent);
     }
     
-    log.warn("WE HAVE AN INPUT FOR THE WORKFLOW TRIGGER: {}");
-    log.warn("WorkflowID :      {}", wfid);
-    log.warn("input :      {}", json.toString());
+
 
     String demotenant = appProps.getProperty("demotenant");
     String domain     = ".api.identitynow.com";
@@ -302,14 +300,22 @@ public class AccountUpdateController {
     String url = "https://" + tenant + domain;
 
 
+    log.warn("WE HAVE AN INPUT FOR THE WORKFLOW TRIGGER: {}");
+    log.warn("WorkflowID :      {}", wfid);
+    log.warn("input :      {}", json.toString());
 
+    log.warn("CREATING A SESSION WITH WF CREDENTIALS {}");
     createSession(url, wfpatid, wfpatsecret);
+    log.warn("getting WorkflowService: {}");
     WorkflowService wService = idnService.getWorkflowService();
 
     try {
       wService.launchWorkflow (wfid, json);
+      log.warn("launch workflow {}");
     } catch (Exception e) {
       log.error("Error checking identity attributes: {}", e.getLocalizedMessage());
+    } finally {
+      log.warn("Workflow launched: {}");
     }
 
 
