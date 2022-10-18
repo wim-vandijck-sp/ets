@@ -277,23 +277,36 @@ public class AccountUpdateController {
     log.debug(appProps.getProperty("workflowid"));
 
     String wfid = appProps.getProperty("workflowid");
-
+    // workflow is only authorized by workflow specific client id / secret
+    String wfpatid = appProps.getProperty("wfpatid");
+    String wfpatsecret = appProps.getProperty("wfpatsecret");
 
     JsonObject json = new JsonObject();
     json.addProperty("identity", identityId);
     json.addProperty("sourceId", sourceId);
 
-   for (String ent: badgroups){
-    json.addProperty("entitlement", ent);
-   }
+    for (String ent: badgroups){
+     json.addProperty("entitlement", ent);
+    }
     
     log.warn("WE HAVE AN INPUT FOR THE WORKFLOW TRIGGER: {}");
     log.warn("WorkflowID :      {}", wfid);
     log.warn("input :      {}", json.toString());
 
+
+
+    String tenant     = appProps.getProperty("tenant");
+    String domain     = ".api.identitynow.com";
+    String url = "https://" + tenant + domain;
+    createSession(url, wfpatid, wfpatsecret);
     WorkflowService wService = idnService.getWorkflowService();
 
-    wService.launchWorkflow (wfid, json);
+    try {
+      wService.launchWorkflow (wfid, json);
+    } catch (Exception e) {
+      log.error("Error checking identity attributes: {}", e.getLocalizedMessage());
+    }
+
 
   }
 
