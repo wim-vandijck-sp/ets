@@ -295,12 +295,12 @@ public class AccountUpdateController {
     log.warn("WorkflowID :      {}", wfid);
     log.warn("input :      {}", json.toString());
 
-
+    String demotenant = appProps.getProperty("demotenant");
     String domain     = ".api.identitynow.com";
     if ("yes".equals(demotenant)) domain = ".api.identitynow-demo.com";
     String tenant     = appProps.getProperty("tenant");
     String url = "https://" + tenant + domain;
-    String demotenant = appProps.getProperty("demotenant");
+
 
 
     //createSession(url, wfpatid, wfpatsecret);
