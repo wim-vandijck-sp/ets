@@ -297,10 +297,11 @@ public class AccountUpdateController {
 
 
     String domain     = ".api.identitynow.com";
+    if ("yes".equals(demotenant)) domain = ".api.identitynow-demo.com";
     String tenant     = appProps.getProperty("tenant");
     String url = "https://" + tenant + domain;
     String demotenant = appProps.getProperty("demotenant");
-    if ("yes".equals(demotenant)) domain = ".api.identitynow-demo.com";
+
 
     createSession(url, wfpatid, wfpatsecret);
     WorkflowService wService = idnService.getWorkflowService();
