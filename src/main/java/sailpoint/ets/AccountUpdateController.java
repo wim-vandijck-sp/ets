@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -38,6 +39,7 @@ import sailpoint.identitynow.api.object.QueryObject;
 import sailpoint.identitynow.api.object.Schemas;
 import sailpoint.identitynow.api.object.SearchQuery;
 import sailpoint.identitynow.api.object.Snapshot;
+import sailpoint.identitynow.api.services.WorkflowService;
 
 @Component
 @PropertySource("classpath:application.properties")
@@ -258,7 +260,7 @@ public class AccountUpdateController {
     return requested;
   }
 
-  private void raiseAlert(String identityId, String sourceId, List<String> badgroups) {
+  private void raiseAlert(String identityId, String sourceId, List<String> badgroups) throws Exception {
 
     log.trace("Entering raiseAlert");
 
@@ -269,6 +271,27 @@ public class AccountUpdateController {
     log.warn("entitlement(s): {}", badgroups);
 
     log.trace("Leaving raiseAlert");
+
+    Properties appProps = getAppProps();
+    log.debug(appProps.getProperty("workflowid"));
+
+    String wfid = appProps.getProperty("workflowid");
+    String wfinput = appProps.getProperty("workflowinput");
+
+    JsonObject json = new JsonObject();
+    json.addProperty("identity", identityId);
+    json.addProperty("sourceId", sourceId);
+    
+    String jsonEnts = new Gson().toJson(badgroups);
+
+    json.addProperty("entitlements", jsonEnts);
+    log.warn("WE HAVE AN INPUT FOR THE WORKFLOW TRIGGER: {}");
+    log.warn("input :      {}", json.toString());
+
+    WorkflowService wService = idnService.getWorkflowService();
+
+    wService.launchWorkflow (wfid, json);
+
   }
 
   private Properties getAppProps() {
