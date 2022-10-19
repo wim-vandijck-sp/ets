@@ -317,7 +317,7 @@ public class AccountUpdateController {
       //wService.launchWorkflow (wfid, json);
       log.warn("launch workflow with URL: {}", url);
       Call<Workflow> response = idnService.getWorkflowService().launchWorkflow(wfid, json);
-      log.debug("Got response: {}", response);
+      log.debug("Got response: {}", response.toString());
     } catch (Exception e) {
       log.error("Error checking identity attributes: {}", e.getLocalizedMessage());
     } finally {
