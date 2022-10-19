@@ -33,6 +33,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import sailpoint.ets.AccountUpdate.Change;
@@ -316,8 +317,9 @@ public class AccountUpdateController {
     try {
       //wService.launchWorkflow (wfid, json);
       log.warn("launch workflow with URL: {}", url);
-      Call<Workflow> response = idnService.getWorkflowService().launchWorkflow(wfid, json);
+      Call<ResponseBody> response = idnService.getWorkflowService().launchWorkflow(wfid, json);
       log.debug("Got response: {}", response.toString());
+      log.debug("Got response: {}", response.);
     } catch (Exception e) {
       log.error("Error checking identity attributes: {}", e.getLocalizedMessage());
     } finally {
