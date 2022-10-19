@@ -285,7 +285,7 @@ public class AccountUpdateController {
     log.warn("entitlement(s): {}", badgroups);
 
     log.trace("Leaving raiseAlert");
-
+/* 
     Properties appProps = getAppProps();
     //log.debug(appProps.getProperty("workflowid"));
 
@@ -337,7 +337,7 @@ public class AccountUpdateController {
     } catch (Exception e) {
       e.printStackTrace();
     }
-
+ */
 
   }
 
