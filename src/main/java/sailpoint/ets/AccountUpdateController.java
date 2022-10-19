@@ -280,7 +280,7 @@ public class AccountUpdateController {
 
     log.warn("WE HAVE A NATIVE CHANGE DETECTION");
     //log.warn("ACTIONS TO BE TAKEN HAPPEN HERE");
-    log.warn("Identity :      {}", identityId);
+    log.warn("Identity:      {}", identityId);
     log.warn("Source:         {}", sourceId);
     log.warn("entitlement(s): {}", badgroups);
 
