@@ -278,7 +278,7 @@ public class AccountUpdateController {
     log.warn("entitlement(s): {}", badgroups);
 
     log.trace("Leaving raiseAlert");
-/* 
+
     Properties appProps = getAppProps();
     //log.debug(appProps.getProperty("workflowid"));
 
@@ -321,14 +321,14 @@ public class AccountUpdateController {
     try {
       //wService.launchWorkflow (wfid, json);
       log.warn("launch workflow with URL: {}", url);
-      idnService2.getWorkflowService().launchWorkflow(wfid, json);
+     idnService2.getWorkflowService().launchWorkflow(wfid, json);
       //log.debug("Got response: {}", response);
     } catch (Exception e) {
       log.error("Error checking identity attributes: {}", e.getLocalizedMessage());
     } finally {
       log.warn("Workflow launched: {}");
     }
- */
+
 
   }
 
