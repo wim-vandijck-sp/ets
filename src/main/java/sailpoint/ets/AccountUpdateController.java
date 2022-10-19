@@ -46,6 +46,7 @@ import sailpoint.identitynow.api.object.Schemas;
 import sailpoint.identitynow.api.object.SearchQuery;
 import sailpoint.identitynow.api.object.Snapshot;
 import sailpoint.identitynow.api.object.Workflow;
+import sailpoint.identitynow.api.services.HistoricalIdentitiesService;
 import sailpoint.identitynow.api.services.WorkflowService;
 
 @Component
@@ -70,7 +71,7 @@ public class AccountUpdateController {
   public AccountUpdate process(@RequestBody String payload, @RequestHeader("Host") String host) throws Exception {
 
     log.trace("Entering process");
-
+    wait(3000);
 
     log.debug("Host is : {}", host);
     String        identityId = null;
@@ -190,13 +191,19 @@ public class AccountUpdateController {
     List<String> badgroups = new ArrayList<>();
 
     // Check if entitlements are part of the last snapshot.
+
+    HistoricalIdentitiesService historicalIdentitiesService = idnService.getHistoricalIdentitiesService();
+    // 0. list snapshots
+    List<Snapshot> snapshopList = historicalIdentitiesService.getAllSnapshots(identityId, null, null).execute().body();
+
+    
     // 1. Fetch last snapshot
-    Snapshot snapshot = idnService.getHistoricalIdentitiesService().getLatestSnapshot(identityId).execute().body();
+    Snapshot snapshot = snapshopList.get(1);
     log.debug("Snapshot: {}", snapshot);
     String snapshotDate = snapshot.getSnapshot();
-
+    log.debug("snapshotDate: {}", snapshotDate);
     // 2. Fetch snapshot of most recent date, listing access items
-    List<AccessEvent.AccessItem> accesses = idnService.getHistoricalIdentitiesService()
+    List<AccessEvent.AccessItem> accesses = historicalIdentitiesService
         .getSnapshot(identityId, snapshotDate, "entitlement").execute().body();
     log.debug("Found {} accesses.", accesses.size());
 
