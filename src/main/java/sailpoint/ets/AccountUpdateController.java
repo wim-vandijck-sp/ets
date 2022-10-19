@@ -326,14 +326,15 @@ public class AccountUpdateController {
 
 
     try {
-      //wService.launchWorkflow (wfid, json);
-      log.warn("launch workflow with URL: {}", url);
-     idnService2.getWorkflowService().launchWorkflow(wfid, json);
-      //log.debug("Got response: {}", response);
+      Response<ResponseBody> response = idnService2.getWorkflowService().launchWorkflow(wfid, json).execute();
+      if (response.isSuccessful()) {
+        ResponseBody resp = response.body();
+        log.debug("resp body, {}", resp);
+      } else {
+        log.debug("Response was not successful for schemas search.");
+      }
     } catch (Exception e) {
-      log.error("Error checking identity attributes: {}", e.getLocalizedMessage());
-    } finally {
-      log.warn("Workflow launched: {}");
+      e.printStackTrace();
     }
 
 
