@@ -309,9 +309,13 @@ public class AccountUpdateController {
     log.warn("input :      {}", json.toString());
 
     log.warn("CREATING A SESSION WITH WF CREDENTIALS {}");
-    createSession(url, wfpatid, wfpatsecret);
+
+    
+    IdentityNowService idnService2 = new IdentityNowService(url, wfpatid, wfpatsecret, null, 60000L);
+
+   // createSession(url, wfpatid, wfpatsecret);
     log.warn("getting WorkflowService: {}");
-    //WorkflowService wService = idnService.getWorkflowService();
+    //WorkflowService wService = idnService2.getWorkflowService();
 
 
     try {
