@@ -71,7 +71,7 @@ public class AccountUpdateController {
   public AccountUpdate process(@RequestBody String payload, @RequestHeader("Host") String host) throws Exception {
 
     log.trace("Entering process");
-    wait(3000);
+    Thread.sleep(3000);
 
     log.debug("Host is : {}", host);
     String        identityId = null;
