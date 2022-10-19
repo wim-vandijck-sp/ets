@@ -278,9 +278,9 @@ public class AccountUpdateController {
     log.warn("entitlement(s): {}", badgroups);
 
     log.trace("Leaving raiseAlert");
-
+/* 
     Properties appProps = getAppProps();
-    log.debug(appProps.getProperty("workflowid"));
+    //log.debug(appProps.getProperty("workflowid"));
 
     String wfid = appProps.getProperty("workflowid");
     // workflow is only authorized by workflow specific client id / secret
@@ -328,7 +328,7 @@ public class AccountUpdateController {
     } finally {
       log.warn("Workflow launched: {}");
     }
-
+ */
 
   }
 
