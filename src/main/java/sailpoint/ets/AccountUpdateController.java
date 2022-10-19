@@ -326,13 +326,14 @@ public class AccountUpdateController {
 
 
     try {
-      Response<ResponseBody> response = idnService2.getWorkflowService().launchWorkflow(wfid, json).execute();
-      if (response.isSuccessful()) {
-        ResponseBody resp = response.body();
+      //Response<ResponseBody> response = idnService2.getWorkflowService().launchWorkflow(wfid, json).execute();
+      idnService2.getWorkflowService().launchWorkflow(wfid, json).execute();
+/*       if (response.isSuccessful()) {
+        //ResponseBody resp = response.body();
         log.debug("resp body, {}", resp);
       } else {
         log.debug("Response was not successful for schemas search.");
-      }
+      } */
     } catch (Exception e) {
       e.printStackTrace();
     }
