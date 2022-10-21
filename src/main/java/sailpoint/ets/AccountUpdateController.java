@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -293,10 +292,14 @@ public class AccountUpdateController {
     JsonObject json = new JsonObject();
 
     // TEST 
-    JsonObject input = new JsonObject();
-    input.addProperty("customAttribute1", "NCD Alert!! More to come later.");
+    // JsonObject input = new JsonObject();
+    // input.addProperty("customAttribute1", "NCD Alert!! More to come later.");
+    Map<String,Object> input = new HashMap<>();
+    Map<String,Object> content = new HashMap<>();
+    content.put("customAttribute1","NCD Alert!! More to come later.");
+    input.put("input",content);
 
-    json.add("input", input);
+    // json.add("input", input);
     // json.addProperty("identity", identityId);
     // json.addProperty("sourceId", sourceId);
 
@@ -305,7 +308,7 @@ public class AccountUpdateController {
     // }
     log.debug("WE HAVE AN INPUT FOR THE WORKFLOW TRIGGER:");
     log.debug("WorkflowID :  {}", wfid);
-    log.debug("input :       {}", json);
+    log.debug("input :       {}", input);
 
     log.debug("Executing workflow");
 
@@ -313,7 +316,7 @@ public class AccountUpdateController {
     log.debug("Response: ");
     log.debug("Success: {}", wfResponse.isSuccessful());
     if (wfResponse.isSuccessful()) {
-      log.debug("Body: {}", new Gson().toJson(wfResponse.body()));
+      log.debug("Body: {}", wfResponse.body().string());
     }
     log.trace("Leaving raiseAlert");
 
