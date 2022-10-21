@@ -36,3 +36,4 @@ build/
 *.DS_Store
 
 Procfile
+src/main/resources/application.properties
