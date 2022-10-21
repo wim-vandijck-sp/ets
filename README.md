@@ -1,5 +1,16 @@
 # Native Change Detection via ETS
 
+This is a Spring Boot project that can be loaded into heroku, and called as an ETS from IDN.
+
+It will trigger on an account change, send a call to the Heroku app. The app will check the identity snapshots for the new access, and if not recognized, launch a certification to the manager.
+
+## Requirementns
+
+* Have heroku setup (see below)
+* Have the IDN SDK installed (see below)
+* Have the account-changed trigger enabled on your tenant.
+
+
 ## Setup 
 
 * Make sure you have the IdentityNow SDK 
@@ -36,6 +47,24 @@ cd ets
 * Edit main/resources/application.properties and set the tenant and PAT info.
 * Add the workflowId, and workflow PAT info
 
+#### application.properties example
+
+```
+logging.level.root=warn
+logging.level.org.springframework.web=warn
+logging.level.sailpoint.ets=trace
+logging.level.org.hibernate=error
+
+tenant=company1234-poc
+patid=83c6bff740a24735919b0ce1fc...
+patsecret=ce079eb807f1....0df0704221c3056056847457e
+demotenant=yes # for DemoHub tenants
+
+workflowid=4da1271a-9eb7-4648-a9b2-5aac7e30345a
+wfpatid=33a2b779-9580-4e18-9c50-f30fb9011f42
+wfpatsecret=763292c4abbbdc05a185c278abea7c82ec0fc586d57035ba2484adc204766cde
+```
+
 #### Build
 ```
 mvn clean compile package
@@ -53,6 +82,7 @@ heroku login
 ### Test Locally
 Start local heroku
 ```
+git push heroku master
 heroku local web
 ```
 
