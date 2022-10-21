@@ -53,6 +53,9 @@ public class AccountUpdateController {
 
   private final AtomicLong counter = new AtomicLong();
   IdentityNowService idnService;
+  String tenant;
+  String url;
+
   Map<String, Object> attrs = new HashMap<>();
 
   @GetMapping("/accountupdated")
@@ -101,13 +104,13 @@ public class AccountUpdateController {
     Properties appProps = getAppProps();
     log.debug(appProps.getProperty("tenant"));
 
-    String tenant     = appProps.getProperty("tenant");
+    tenant     = appProps.getProperty("tenant");
     String patid      = appProps.getProperty("patid");
     String patsecret  = appProps.getProperty("patsecret");
     String demotenant = appProps.getProperty("demotenant");
     String domain     = ".api.identitynow.com";
     if ("yes".equals(demotenant)) domain = ".api.identitynow-demo.com";
-    String url = "https://" + tenant + domain;
+    url = "https://" + tenant + domain;
 
     // Create IDN session
     try {
@@ -283,7 +286,7 @@ public class AccountUpdateController {
     String     wfpatsecret = appProps.getProperty("wfpatsecret");
 
     log.debug("getting WorkflowService");
-    IdentityNowService wfSession = createSession(sourceId, wfpatid, wfpatsecret);
+    IdentityNowService wfSession = createSession(url, wfpatid, wfpatsecret);
     WorkflowService wService = wfSession.getWorkflowService();
     JsonObject json = new JsonObject();
 
