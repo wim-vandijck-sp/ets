@@ -311,7 +311,9 @@ public class AccountUpdateController {
     Response<ResponseBody> wfResponse = wService.executeWorkflow(input, wfid).execute();
     log.debug("Response: ");
     log.debug("Success: {}", wfResponse.isSuccessful());
-    log.debug("Body: {}", wfResponse.body());
+    if (wfResponse.isSuccessful()) {
+      log.debug("Body: {}", wfResponse.body().toString());
+    }
     log.trace("Leaving raiseAlert");
 
   }
