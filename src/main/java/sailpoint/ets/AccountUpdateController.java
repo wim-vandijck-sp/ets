@@ -13,11 +13,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.websocket.Session;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.message.Message;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
@@ -27,14 +24,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-import okhttp3.ResponseBody;
-import retrofit2.Call;
 import retrofit2.Response;
 import sailpoint.ets.AccountUpdate.Change;
 import sailpoint.identitynow.api.IdentityNowService;
@@ -117,7 +111,7 @@ public class AccountUpdateController {
 
     // Create IDN session
     try {
-      createSession(url, patid, patsecret);
+      idnService = createSession(url, patid, patsecret);
     } catch (MalformedURLException e1) {
       e1.printStackTrace();
     }
@@ -278,66 +272,39 @@ public class AccountUpdateController {
 
     log.trace("Entering raiseAlert");
 
-    log.warn("WE HAVE A NATIVE CHANGE DETECTION");
-    //log.warn("ACTIONS TO BE TAKEN HAPPEN HERE");
-    log.warn("Identity:      {}", identityId);
-    log.warn("Source:         {}", sourceId);
-    log.warn("entitlement(s): {}", badgroups);
+    log.debug("WE HAVE A NATIVE CHANGE DETECTION");
+    log.debug("Identity:      {}", identityId);
+    log.debug("Source:         {}", sourceId);
+    log.debug("entitlement(s): {}", badgroups);
 
-    log.trace("Leaving raiseAlert");
+    Properties appProps    = getAppProps();
+    String     wfid        = appProps.getProperty("workflowid");
+    String     wfpatid     = appProps.getProperty("wfpatid");
+    String     wfpatsecret = appProps.getProperty("wfpatsecret");
 
-    Properties appProps = getAppProps();
-    //log.debug(appProps.getProperty("workflowid"));
-
-    String wfid = appProps.getProperty("workflowid");
-    // workflow is only authorized by workflow specific client id / secret
-    String wfpatid = appProps.getProperty("wfpatid");
-    String wfpatsecret = appProps.getProperty("wfpatsecret");
-
+    log.debug("getting WorkflowService");
+    IdentityNowService wfSession = createSession(sourceId, wfpatid, wfpatsecret);
+    WorkflowService wService = wfSession.getWorkflowService();
     JsonObject json = new JsonObject();
-    json.addProperty("identity", identityId);
-    json.addProperty("sourceId", sourceId);
 
-    for (String ent: badgroups){
-     json.addProperty("entitlement", ent);
-    }
-    
+    // TEST 
+    JsonObject input = new JsonObject();
+    input.addProperty("customAttribute1", "NCD Alert!! More to come later.");
 
+    json.add("indput", input);
+    // json.addProperty("identity", identityId);
+    // json.addProperty("sourceId", sourceId);
 
-    String demotenant = appProps.getProperty("demotenant");
-    String domain     = ".api.identitynow.com";
-    if ("yes".equals(demotenant)) domain = ".api.identitynow-demo.com";
-    String tenant     = appProps.getProperty("tenant");
-    String url = "https://" + tenant + domain;
-
-
-    log.warn("WE HAVE AN INPUT FOR THE WORKFLOW TRIGGER: {}");
-    log.warn("WorkflowID :      {}", wfid);
-    log.warn("input :      {}", json.toString());
-
-    log.warn("CREATING A SESSION WITH WF CREDENTIALS {}");
+    // for (String ent: badgroups){
+    //  json.addProperty("entitlement", ent);
+    // }
+    log.debug("WE HAVE AN INPUT FOR THE WORKFLOW TRIGGER:");
+    log.debug("WorkflowID :  {}", wfid);
+    log.debug("input :       {}", json);
 
     
-    IdentityNowService idnService2 = new IdentityNowService(url, wfpatid, wfpatsecret, null, 60000L);
-
-   // createSession(url, wfpatid, wfpatsecret);
-    log.warn("getting WorkflowService: {}");
-    //WorkflowService wService = idnService2.getWorkflowService();
-
-
-    try {
-      Response<ResponseBody> response = idnService2.getWorkflowService().launchWorkflow(wfid, json).execute();
-      //idnService2.getWorkflowService().launchWorkflow(wfid, json).execute();
-      if (response.isSuccessful()) {
-        ResponseBody resp = response.body();
-        log.debug("resp body, {}", resp);
-      } else {
-        log.debug("Response was not successful for schemas search.");
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-
+    wService.executeWorkflow(input, wfid);
+    log.trace("Leaving raiseAlert");
 
   }
 
@@ -445,7 +412,9 @@ public class AccountUpdateController {
    * @throws Exception
    * @throws ParseException
    */
-  private void createSession(String url, String patid, String patsecret) throws Exception {
+  private IdentityNowService createSession(String url, String patid, String patsecret) throws Exception {
+
+    IdentityNowService identitnowService;
 
     log.trace("Entering createSession");
     log.debug("URL: {}", url);
@@ -453,12 +422,12 @@ public class AccountUpdateController {
     log.debug("patsecret: {}", patsecret);
 
     log.info("Getting idnService");
-    idnService = new IdentityNowService(url, patid, patsecret, null, 60000L);
+    identitnowService = new IdentityNowService(url, patid, patsecret, null, 60000L);
     log.info("Got idnService");
 
     log.info("Checking credentials...");
     try {
-      idnService.createSession();
+      identitnowService.createSession();
       log.info("Session created.");
     } catch (Exception e) {
       log.error(
@@ -467,6 +436,7 @@ public class AccountUpdateController {
       System.exit(0);
     }
     log.trace("Leaving createSession");
+    return identitnowService;
   }
 
   /**
