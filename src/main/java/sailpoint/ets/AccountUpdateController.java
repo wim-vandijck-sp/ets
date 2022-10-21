@@ -29,6 +29,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
+import okhttp3.ResponseBody;
 import retrofit2.Response;
 import sailpoint.ets.AccountUpdate.Change;
 import sailpoint.identitynow.api.IdentityNowService;
@@ -305,8 +306,12 @@ public class AccountUpdateController {
     log.debug("WorkflowID :  {}", wfid);
     log.debug("input :       {}", json);
 
-    
-    wService.executeWorkflow(input, wfid);
+    log.debug("Executing workflow");
+
+    Response<ResponseBody> wfResponse = wService.executeWorkflow(input, wfid).execute();
+    log.debug("Response: ");
+    log.debug("Success: {}", wfResponse.isSuccessful());
+    log.debug("Body: {}", wfResponse.body());
     log.trace("Leaving raiseAlert");
 
   }
