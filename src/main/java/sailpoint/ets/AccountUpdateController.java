@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -312,7 +313,7 @@ public class AccountUpdateController {
     log.debug("Response: ");
     log.debug("Success: {}", wfResponse.isSuccessful());
     if (wfResponse.isSuccessful()) {
-      log.debug("Body: {}", wfResponse.body().toString());
+      log.debug("Body: {}", new Gson().toJson(wfResponse.body()));
     }
     log.trace("Leaving raiseAlert");
 
