@@ -1,0 +1,83 @@
+{
+  "name": "NCD Certification Workflow",
+  "description": "Workflow that launches a certification upon Native Change Detection",
+  "definition": {
+      "start": "Get Identity",
+      "steps": {
+          "Create Certification Campaign": {
+              "actionId": "sp:create-campaign",
+              "attributes": {
+                  "activateUponCreation": true,
+                  "description": "We detected a Native Change Detection, and launched a certification campaign.",
+                  "duration": "1d",
+                  "emailNotificationEnabled": true,
+                  "name": "NCD Certification campaign",
+                  "reviewerAccessItemType": "ENTITLEMENT",
+                  "reviewerAccessOperator": "SELECTED",
+                  "reviewerCertificationType": "IDENTITY",
+                  "reviewerId.$": "$.getIdentity1.id",
+                  "reviewerIdentitiesToCertify.$": "$.getIdentity.id",
+                  "sourceIds.$": "$.getIdentity.id",
+                  "type": "REVIEWER_IDENTITY",
+                  "undecidedAccess": true
+              },
+              "description": "Create campaign for NCD",
+              "nextStep": "Send Email",
+              "type": "action",
+              "versionNumber": 2
+          },
+          "Get Identity": {
+              "actionId": "sp:get-identity",
+              "attributes": {
+                  "id.$": "$.trigger.input.identityId"
+              },
+              "description": null,
+              "nextStep": "Get Identity 1",
+              "type": "action",
+              "versionNumber": 2
+          },
+          "Get Identity 1": {
+              "actionId": "sp:get-identity",
+              "attributes": {
+                  "id.$": "$.getIdentity.managerRef.id"
+              },
+              "nextStep": "Create Certification Campaign",
+              "type": "action",
+              "versionNumber": 2
+          },
+          "Send Email": {
+              "actionId": "sp:send-email",
+              "attributes": {
+                  "body": "Hello ${var1},<br> <p>This email is to inform that your direct report <b style=\\\"\\\"> <i style-\\\"\\\"><u style=\\\"\\\"><font face=\\\"verdana\\\">${var2} </font></u></i></b>has been identified as having received access outside of the IAG system: <b>${var3}</b>. A certification campaign has been created with the name of <b style=\\\"\\\"><i style=\\\"\\\">${var4} </b></i> Please ensure you complete the campaign in <b style=\\\"\\\">30 days</b></p> <p> Thank you, <br> <b style=\\\"\\\"><i style=\\\"\\\"> Corporate Compliance Officer </b></o></p>",
+                  "context": {
+                      "var1.$": "$.getIdentity1.attributes.firstname",
+                      "var2.$": "$.getIdentity.attributes.displayName",
+                      "var3.$": "$.trigger.input.groups",
+                      "var4.$": "$.createCertificationCampaign.name"
+                  },
+                  "from": null,
+                  "recipientEmailList.$": "$.getIdentity1.emailAddress",
+                  "replyTo": null,
+                  "subject": "Native Change Detected"
+              },
+              "description": null,
+              "nextStep": "success",
+              "type": "action",
+              "versionNumber": 2
+          },
+          "success": {
+              "type": "success"
+          }
+      }
+  },
+  "enabled": false,
+  "executionCount": 8,
+  "failureCount": 0,
+  "trigger": {
+      "type": "EXTERNAL",
+      "attributes": {
+          "clientId": "33a2b779-9580-4e18-9c50-f30fb9011f42",
+          "url": "/beta/workflows/execute/external/4da1271a-9eb7-4648-a9b2-5aac7e30345a"
+      }
+  }
+}

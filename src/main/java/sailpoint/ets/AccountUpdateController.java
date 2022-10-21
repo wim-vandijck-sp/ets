@@ -40,7 +40,6 @@ import sailpoint.identitynow.api.object.QueryObject;
 import sailpoint.identitynow.api.object.Schemas;
 import sailpoint.identitynow.api.object.SearchQuery;
 import sailpoint.identitynow.api.object.Snapshot;
-import sailpoint.identitynow.api.object.Workflow;
 import sailpoint.identitynow.api.services.HistoricalIdentitiesService;
 import sailpoint.identitynow.api.services.WorkflowService;
 
@@ -148,6 +147,7 @@ public class AccountUpdateController {
     return new AccountUpdate(0, payload);
   }
 
+  @SuppressWarnings("unchecked")
   private List<String> getNewEntitlements(AccountUpdate update, List<String> entitlements) {
     log.trace("Entering getNewEntitlements");
     List<String> ents = new ArrayList<>();
@@ -289,34 +289,24 @@ public class AccountUpdateController {
     log.debug("getting WorkflowService");
     IdentityNowService wfSession = createSession(url, wfpatid, wfpatsecret);
     WorkflowService wService = wfSession.getWorkflowService();
-    JsonObject json = new JsonObject();
 
-    // TEST 
-    // JsonObject input = new JsonObject();
-    // input.addProperty("customAttribute1", "NCD Alert!! More to come later.");
     Map<String,Object> input = new HashMap<>();
     Map<String,Object> content = new HashMap<>();
-    content.put("customAttribute1","NCD Alert!! More to come later.");
+    content.put("identityId",identityId);
+    content.put("sourceId",sourceId);
+    content.put("groups",badgroups);
     input.put("input",content);
 
-    // json.add("input", input);
-    // json.addProperty("identity", identityId);
-    // json.addProperty("sourceId", sourceId);
-
-    // for (String ent: badgroups){
-    //  json.addProperty("entitlement", ent);
-    // }
-    log.debug("WE HAVE AN INPUT FOR THE WORKFLOW TRIGGER:");
-    log.debug("WorkflowID :  {}", wfid);
+    log.debug("Workflow input:");
     log.debug("input :       {}", input);
 
     log.debug("Executing workflow");
-
     Response<ResponseBody> wfResponse = wService.executeWorkflow(input, wfid).execute();
     log.debug("Response: ");
     log.debug("Success: {}", wfResponse.isSuccessful());
     if (wfResponse.isSuccessful()) {
-      log.debug("Body: {}", wfResponse.body().string());
+      String responseBody = wfResponse.body().string();
+      log.debug("Body: {}", responseBody);
     }
     log.trace("Leaving raiseAlert");
 
