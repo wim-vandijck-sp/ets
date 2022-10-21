@@ -91,3 +91,14 @@ heroku local web
 ### Import the workflow
 
 * see `src/main/resources` for a workflow example. I'm not sure how well that will import, since when you use an external trigger, you need to create a PAT for the workflow.
+
+The workflow takes following input :
+```
+{
+  "input": {
+    "identityId": "2c9180868222b4c8018236703ab85803",
+    "sourceId" : "2c9180868222b4c8018236703ab85802",
+    "entitlement": "[Administrators]"
+  }
+}
+```
