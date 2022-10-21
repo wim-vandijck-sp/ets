@@ -295,7 +295,7 @@ public class AccountUpdateController {
     JsonObject input = new JsonObject();
     input.addProperty("customAttribute1", "NCD Alert!! More to come later.");
 
-    json.add("indput", input);
+    json.add("input", input);
     // json.addProperty("identity", identityId);
     // json.addProperty("sourceId", sourceId);
 
